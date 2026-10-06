@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icon.svg" type="image/svg+xml" />
+  <title>律师咨询分诊助手</title>
+  <style>
+    :root{--bg:#f5f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--accent:#111827;--ok:#065f46;--warn:#92400e;--hot:#991b1b}
+    *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text)}
+    .wrap{max-width:760px;margin:0 auto;padding:18px 14px 40px}.hero{padding:18px 4px 8px}
+    h1{font-size:26px;margin:0 0 6px}.sub{color:var(--muted);font-size:14px;line-height:1.6}
+    .notice{background:#fff7ed;border:1px solid #fed7aa;border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.55;margin:12px 0}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-top:14px;box-shadow:0 2px 12px rgba(17,24,39,.04)}
+    label{display:block;font-size:13px;font-weight:650;margin:12px 0 6px}
+    input,select,textarea{width:100%;border:1px solid #d1d5db;border-radius:12px;padding:12px 12px;font-size:16px;background:#fff;color:#111827}
+    textarea{min-height:120px;resize:vertical}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    @media(max-width:620px){.grid{grid-template-columns:1fr}}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    button{border:0;border-radius:12px;padding:12px 16px;font-size:15px;font-weight:700;cursor:pointer}
+    .primary{background:var(--accent);color:white;flex:1}.ghost{background:#eef2f7;color:#111827}
+    .result{display:none}.badge{display:inline-block;padding:6px 10px;border-radius:999px;font-size:13px;font-weight:800}
+    .high{background:#fee2e2;color:var(--hot)}.medium{background:#fef3c7;color:var(--warn)}.low{background:#d1fae5;color:var(--ok)}
+    .score{font-size:46px;font-weight:900;line-height:1;margin:10px 0 4px}
+    .meta{font-size:13px;color:var(--muted);line-height:1.6}.list{padding-left:18px;line-height:1.7}
+    .history-item{border-top:1px solid var(--line);padding:12px 0}.history-item:first-child{border-top:0}
+    .small{font-size:12px;color:var(--muted)}
+    .footer{margin-top:22px;color:var(--muted);font-size:12px;text-align:center}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hero">
+    <h1>律师咨询分诊助手</h1>
+    <div class="sub">演示版｜帮助快速整理咨询信息、判断优先级和缺失材料。所有数据仅保存在本机浏览器。</div>
+  </div>
+
+  <div class="notice">
+    ⚠️ 本工具仅用于内部咨询分流与演示，不提供法律意见，不替代律师专业判断。请勿录入身份证号、银行卡号、完整案卷、未公开证据等高度敏感信息。
+  </div>
+
+  <div class="card">
+    <div class="grid">
+      <div>
+        <label>咨询人称呼</label>
+        <input id="name" placeholder="如：王先生" />
+      </div>
+      <div>
+        <label>联系方式（可选）</label>
+        <input id="contact" placeholder="电话 / 微信 / 邮箱" />
+      </div>
+      <div>
+        <label>案件类型</label>
+        <select id="caseType">
+          <option value="">请选择</option>
+          <option>合同纠纷</option>
+          <option>劳动争议</option>
+          <option>婚姻家事</option>
+          <option>债权债务</option>
+          <option>交通事故</option>
+          <option>刑事相关</option>
+          <option>公司商事</option>
+          <option>房产纠纷</option>
+          <option>知识产权</option>
+          <option>其他</option>
+        </select>
+      </div>
+      <div>
+        <label>当前阶段</label>
+        <select id="stage">
+          <option value="">请选择</option>
+          <option>刚发生 / 尚未处理</option>
+          <option>协商中</option>
+          <option>收到律师函/催告</option>
+          <option>已立案</option>
+          <option>即将开庭</option>
+          <option>判决/裁决后</option>
+          <option>执行阶段</option>
+        </select>
+      </div>
+      <div>
+        <label>时间紧迫程度</label>
+        <select id="urgency">
+          <option value="0">不确定 / 不紧急</option>
+          <option value="1">一周内需要处理</option>
+          <option value="2">72小时内需要处理</option>
+          <option value="3">24小时内 / 今天</option>
+        </select>
+      </div>
+      <div>
+        <label>是否愿意委托律师</label>
+        <select id="intent">
+          <option value="0">只是先咨询</option>
+          <option value="1">考虑委托</option>
+          <option value="2">明确希望尽快委托</option>
+        </select>
+      </div>
+      <div>
+        <label>争议金额 / 标的（可选）</label>
+        <select id="amount">
+          <option value="0">不清楚 / 不适用</option>
+          <option value="1">1万元以下</option>
+          <option value="2">1–10万元</option>
+          <option value="3">10–50万元</option>
+          <option value="4">50万元以上</option>
+        </select>
+      </div>
+      <div>
+        <label>现有材料</label>
+        <select id="docs">
+          <option value="0">基本没有</option>
+          <option value="1">有部分聊天/转账/合同</option>
+          <option value="2">材料较完整</option>
+        </select>
+      </div>
+    </div>
+
+    <label>案情摘要</label>
+    <textarea id="summary" placeholder="用几句话写清楚：发生了什么、对方是谁、现在卡在哪里、希望律师帮什么。"></textarea>
+
+    <label>关键日期 / 风险点（可选）</label>
+    <input id="deadline" placeholder="如：10月12日开庭 / 对方要求3天内付款" />
+
+    <div class="row" style="margin-top:16px">
+      <button class="primary" id="analyzeBtn">生成分诊结果</button>
+      <button class="ghost" id="clearBtn">清空</button>
+    </div>
+  </div>
+
+  <div class="card result" id="resultCard">
+    <div id="priorityBadge" class="badge"></div>
+    <div class="score" id="scoreText">0</div>
+    <div class="meta">内部优先级评分（0–100）</div>
+
+    <h3>建议动作</h3>
+    <div id="actionText"></div>
+
+    <h3>原因</h3>
+    <ul class="list" id="reasons"></ul>
+
+    <h3>建议补充材料</h3>
+    <ul class="list" id="missing"></ul>
+
+    <div class="row">
+      <button class="ghost" id="copyBtn">复制摘要</button>
+      <button class="ghost" id="saveBtn">保存到本机记录</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row" style="justify-content:space-between">
+      <h3 style="margin:0">本机咨询记录</h3>
+      <button class="ghost" id="clearHistoryBtn">清空记录</button>
+    </div>
+    <div id="history" class="meta" style="margin-top:8px">暂无记录</div>
+  </div>
+
+  <div class="footer">Demo v0.1 · Local-only · No cloud upload</div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let lastResult = null;
+
+function val(id){ return $(id).value.trim(); }
+function num(id){ return Number($(id).value || 0); }
+
+function analyze(){
+  const name = val('name');
+  const caseType = val('caseType');
+  const stage = val('stage');
+  const urgency = num('urgency');
+  const intent = num('intent');
+  const amount = num('amount');
+  const docs = num('docs');
+  const summary = val('summary');
+  const deadline = val('deadline');
+
+  let score = 0;
+  const reasons = [];
+  const missing = [];
+
+  score += urgency * 15;
+  if (urgency >= 2) reasons.push('时间较紧，需要优先确认期限和程序风险。');
+
+  score += intent * 12;
+  if (intent === 2) reasons.push('咨询人明确表达了尽快委托意愿。');
+
+  score += Math.min(amount * 6, 24);
+  if (amount >= 3) reasons.push('争议标的较高，建议尽快评估证据与诉讼/谈判策略。');
+
+  score += docs * 5;
+  if (docs === 2) reasons.push('现有材料较完整，便于快速进入专业判断。');
+
+  if (caseType) score += 5; else missing.push('案件类型');
+  if (stage) score += 5; else missing.push('当前处理阶段');
+  if (summary.length >= 40) score += 8;
+  else if (summary.length >= 15) score += 4;
+  else missing.push('更完整的案情摘要');
+
+  if (deadline) {
+    score += 4;
+    reasons.push('已提供关键日期/期限信息，应核对是否存在诉讼时效、举证或开庭期限。');
+  } else {
+    missing.push('关键日期（若有开庭、催告、付款、仲裁等期限）');
+  }
+
+  if (!val('contact')) missing.push('可回访联系方式');
+  if (docs === 0) missing.push('合同、聊天记录、付款凭证、通知/函件等基础材料');
+
+  score = Math.max(0, Math.min(100, score));
+
+  let priority, cls, action;
+  if (score >= 70) {
+    priority = '高优先级';
+    cls = 'high';
+    action = '建议尽快由律师本人回访，先核对期限、证据和委托意愿；必要时安排当日/次日沟通。';
+  } else if (score >= 40) {
+    priority = '中优先级';
+    cls = 'medium';
+    action = '建议在正常工作时段内回访，补齐关键信息和材料后再决定是否进入正式委托评估。';
+  } else {
+    priority = '低优先级';
+    cls = 'low';
+    action = '建议先补充基础事实、关键日期和材料；可由助理完成首轮信息收集。';
+  }
+
+  if (!reasons.length) reasons.push('当前信息较少，评分主要依据已填写字段，建议补充后重新评估。');
+  if (!missing.length) missing.push('目前未发现明显缺失项。');
+
+  lastResult = {
+    ts: new Date().toISOString(),
+    name, contact: val('contact'), caseType, stage, urgency, intent, amount, docs, summary, deadline,
+    score, priority, action, reasons, missing
+  };
+
+  $('priorityBadge').textContent = priority;
+  $('priorityBadge').className = 'badge ' + cls;
+  $('scoreText').textContent = score;
+  $('actionText').textContent = action;
+  $('reasons').innerHTML = reasons.map(x => `<li>${escapeHtml(x)}</li>`).join('');
+  $('missing').innerHTML = missing.map(x => `<li>${escapeHtml(x)}</li>`).join('');
+  $('resultCard').style.display = 'block';
+  $('resultCard').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function escapeHtml(s=''){
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function copySummary(){
+  if(!lastResult) return;
+  const t = [
+    `咨询人：${lastResult.name || '未填写'}`,
+    `案件类型：${lastResult.caseType || '未填写'}`,
+    `阶段：${lastResult.stage || '未填写'}`,
+    `优先级：${lastResult.priority}（${lastResult.score}/100）`,
+    `案情摘要：${lastResult.summary || '未填写'}`,
+    `关键日期：${lastResult.deadline || '未填写'}`,
+    `建议动作：${lastResult.action}`,
+    `原因：${lastResult.reasons.join('；')}`,
+    `待补充：${lastResult.missing.join('；')}`
+  ].join('\n');
+  navigator.clipboard.writeText(t).then(()=>alert('已复制'));
+}
+
+function saveRecord(){
+  if(!lastResult) return;
+  const arr = JSON.parse(localStorage.getItem('legal_intake_records') || '[]');
+  arr.unshift(lastResult);
+  localStorage.setItem('legal_intake_records', JSON.stringify(arr.slice(0,50)));
+  renderHistory();
+  alert('已保存到本机');
+}
+
+function renderHistory(){
+  const arr = JSON.parse(localStorage.getItem('legal_intake_records') || '[]');
+  if(!arr.length){ $('history').innerHTML = '暂无记录'; return; }
+  $('history').innerHTML = arr.map(r => `
+    <div class="history-item">
+      <div><strong>${escapeHtml(r.name || '未命名咨询')}</strong> · ${escapeHtml(r.caseType || '未分类')} · ${escapeHtml(r.priority)} ${r.score}/100</div>
+      <div class="small">${new Date(r.ts).toLocaleString()} · ${escapeHtml((r.summary || '').slice(0,70))}</div>
+    </div>`).join('');
+}
+
+$('analyzeBtn').addEventListener('click', analyze);
+$('copyBtn').addEventListener('click', copySummary);
+$('saveBtn').addEventListener('click', saveRecord);
+$('clearBtn').addEventListener('click', ()=>{
+  document.querySelectorAll('input,textarea').forEach(el=>el.value='');
+  document.querySelectorAll('select').forEach(el=>el.selectedIndex=0);
+  $('resultCard').style.display='none'; lastResult=null;
+});
+$('clearHistoryBtn').addEventListener('click', ()=>{
+  if(confirm('确定清空本机记录？')){ localStorage.removeItem('legal_intake_records'); renderHistory(); }
+});
+
+renderHistory();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+}
+</script>
+</body>
+</html>
