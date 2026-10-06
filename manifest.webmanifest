@@ -1,6 +1,6 @@
 {
-  "name": "律师咨询分诊助手",
-  "short_name": "律师分诊",
+  "name": "Legal Intake & Triage Assistant",
+  "short_name": "Legal Triage",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f5f7fb",
